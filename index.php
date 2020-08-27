@@ -21,15 +21,17 @@ function getUrl($url):array
 
 /**
  * @param $apartInfo
+ * @param $tg
  * @param bool $update
  * @param int $oldAmount
  * @return bool
  */
-function sendMessage($apartInfo, $update = false, $oldAmount = 0):bool
+function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
 {
     // TODO improve text
     $amount = $update ? '<b>Up:</b>%20' . $oldAmount . '%20->%20<b>' . (int)$apartInfo['price']['amount'] . '</b>' : '<b>' . (int)$apartInfo['price']['amount'] . '</b>';
-    $baseUrl = 'https://api.telegram.org/bot1151816957:AAE_vsL14Kv3qrfbdym-tqzjlJ9mOMzDCtU/sendMessage?chat_id=@aveaparts&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['user_address'] . '</a>';
+    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['user_address'] . '</a>';
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -64,6 +66,7 @@ function getApartsFromOnliner($parseMode):array
 }
 
 $config = parse_ini_file('.env', true);
+$token = $config['tg_token'];
 
 $aparts = getApartsFromOnliner($config['parse_mode']);
 
@@ -106,7 +109,7 @@ foreach ($aparts as $apartFromOnliner) {
                 ], ['apart_id' => $apartFromOnliner['id']]);
                 if ($res) {
                     print "sendMessage Update\n";
-                    sendMessage($apartFromOnliner, true, $item['amount']);
+                    sendMessage($apartFromOnliner, $token,true, $item['amount']);
                 } else {
                     print pg_last_error();
                     die('error update');
@@ -128,7 +131,7 @@ foreach ($aparts as $apartFromOnliner) {
         );
         if ($res) {
             print "sendMessage Insert\n";
-            sendMessage($apartFromOnliner);
+            sendMessage($apartFromOnliner, $token);
         } else {
             var_dump($apartFromOnliner);
             print pg_last_error();
