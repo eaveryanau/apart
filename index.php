@@ -41,6 +41,7 @@ function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
     print "\n\n";
     print $baseUrl;
     print_r($res);
+    sleep(10);
     return true;
 }
 
