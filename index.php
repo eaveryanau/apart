@@ -29,8 +29,9 @@ function getUrl($url):array
 function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
 {
     // TODO improve text
+    $agency = !$apartInfo['contact']['owner'] ? 'Agency ' : '';
     $amount = $update ? '<b>Up:</b>%20' . $oldAmount . '%20->%20<b>' . (int)$apartInfo['price']['amount'] . '</b>' : '<b>' . (int)$apartInfo['price']['amount'] . '</b>';
-    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['user_address'] . '</a>';
+    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['user_address'] . '</a>';
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseUrl);
@@ -53,7 +54,7 @@ function getApartsFromOnliner($parseMode):array
     $aparts = [];
 
     do {
-        $onlinerUrl = 'https://ak.api.onliner.by/search/apartments?rent_type%5B%5D=2_rooms&rent_type%5B%5D=3_rooms&rent_type%5B%5D=4_rooms&rent_type%5B%5D=5_rooms&rent_type%5B%5D=6_rooms&price%5Bmin%5D=50&price%5Bmax%5D=460&currency=usd&only_owner=true&bounds%5Blb%5D%5Blat%5D=53.77955794100295&bounds%5Blb%5D%5Blong%5D=27.39097595214844&bounds%5Brt%5D%5Blat%5D=54.016645360195085&bounds%5Brt%5D%5Blong%5D=27.734298706054688&page=' . $i . '&v=0.8131840960715253';
+        $onlinerUrl = 'https://ak.api.onliner.by/search/apartments?rent_type%5B%5D=2_rooms&rent_type%5B%5D=3_rooms&rent_type%5B%5D=4_rooms&rent_type%5B%5D=5_rooms&rent_type%5B%5D=6_rooms&price%5Bmin%5D=50&price%5Bmax%5D=460&currency=usd&bounds%5Blb%5D%5Blat%5D=53.77955794100295&bounds%5Blb%5D%5Blong%5D=27.39097595214844&bounds%5Brt%5D%5Blat%5D=54.016645360195085&bounds%5Brt%5D%5Blong%5D=27.734298706054688&page=' . $i . '&v=0.8131840960715253';
         $onlineInfo = getUrl($onlinerUrl);
         $aparts = array_merge($aparts, $onlineInfo['aparts']);
         if ($parseMode === 0) {
