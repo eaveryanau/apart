@@ -28,11 +28,20 @@ function getUrl($url):array
  */
 function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
 {
+    //Send Photo
+    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendPhoto?chat_id=@aveaparts&disable_notification=true&photo=' . $apartInfo['photo'];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $baseUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_exec($ch);
+    curl_close($ch);
+    sleep(3);
+
+    //Send url
     // TODO improve text
     $agency = !$apartInfo['contact']['owner'] ? 'Agency ' : '';
     $amount = $update ? '<b>Up:</b>%20' . $oldAmount . '%20->%20<b>' . (int)$apartInfo['price']['amount'] . '</b>' : '<b>' . (int)$apartInfo['price']['amount'] . '</b>';
-    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['user_address'] . '</a>';
-
+    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&disable_web_page_preview=true&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['address'] . '</a><br>=========================';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -41,7 +50,7 @@ function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
     print "\n\n";
     print $baseUrl;
     print_r($res);
-    sleep(10);
+    sleep(3);
     return true;
 }
 
