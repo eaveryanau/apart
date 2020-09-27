@@ -41,7 +41,7 @@ function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
     // TODO improve text
     $agency = !$apartInfo['contact']['owner'] ? 'Agency ' : '';
     $amount = $update ? '<b>Up:</b>%20' . $oldAmount . '%20->%20<b>' . (int)$apartInfo['price']['amount'] . '</b>' : '<b>' . (int)$apartInfo['price']['amount'] . '</b>';
-    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&disable_web_page_preview=true&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['address'] . '</a><br>=========================';
+    $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&disable_web_page_preview=true&parse_mode=HTML&text=<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['address'] . '</a>';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $baseUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
