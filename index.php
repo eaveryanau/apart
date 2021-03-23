@@ -55,19 +55,21 @@ function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
 }
 
 /**
- * @param $parseMode
+ * @param $config
  * @return array
  */
-function getApartsFromOnliner($parseMode):array
+function getApartsFromOnliner($config):array
 {
     $i = 1;
     $aparts = [];
+    $minPrice = $config['min_price'];
+    $maxPrice = $config['max_price'];
 
     do {
-        $onlinerUrl = 'https://ak.api.onliner.by/search/apartments?rent_type%5B%5D=2_rooms&rent_type%5B%5D=3_rooms&rent_type%5B%5D=4_rooms&rent_type%5B%5D=5_rooms&rent_type%5B%5D=6_rooms&price%5Bmin%5D=50&price%5Bmax%5D=460&currency=usd&bounds%5Blb%5D%5Blat%5D=53.77955794100295&bounds%5Blb%5D%5Blong%5D=27.39097595214844&bounds%5Brt%5D%5Blat%5D=54.016645360195085&bounds%5Brt%5D%5Blong%5D=27.734298706054688&page=' . $i . '&v=0.8131840960715253';
+        $onlinerUrl = 'https://ak.api.onliner.by/search/apartments?rent_type%5B%5D=2_rooms&rent_type%5B%5D=3_rooms&rent_type%5B%5D=4_rooms&rent_type%5B%5D=5_rooms&rent_type%5B%5D=6_rooms&price%5Bmin%5D=' . $minPrice . '&price%5Bmax%5D=' . $maxPrice . '&currency=usd&bounds%5Blb%5D%5Blat%5D=53.77955794100295&bounds%5Blb%5D%5Blong%5D=27.39097595214844&bounds%5Brt%5D%5Blat%5D=54.016645360195085&bounds%5Brt%5D%5Blong%5D=27.734298706054688&page=' . $i . '&v=0.8131840960715253';
         $onlineInfo = getUrl($onlinerUrl);
         $aparts = array_merge($aparts, $onlineInfo['aparts']);
-        if ($parseMode === 0) {
+        if ($config['parse_mode'] === 0) {
             break;
         }
         $i++;
@@ -79,7 +81,7 @@ function getApartsFromOnliner($parseMode):array
 $config = parse_ini_file('.env', true);
 $token = $config['tg_token'];
 
-$aparts = getApartsFromOnliner($config['parse_mode']);
+$aparts = getApartsFromOnliner($config);
 
 $host = "host = " . $config['DB_HOST'];
 $port = "port = " . $config['DB_PORT'];
