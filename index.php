@@ -28,6 +28,10 @@ function getUrl($url):array
  */
 function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
 {
+    if((int)$apartInfo['price']['amount'] > 90000){
+        return false;
+    }
+
     //Send Photo
     $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendPhoto?chat_id=@aveaparts&disable_notification=true&photo=' . $apartInfo['photo'];
     $ch = curl_init();
@@ -35,12 +39,12 @@ function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_exec($ch);
     curl_close($ch);
-    sleep(3);
+    sleep(2);
 
     //Send url
     // TODO improve text
     $agency = $apartInfo['seller']['type'] === 'agent' ? 'Agency ' : '';
-    $amount = $update ? '<b>Up:</b>%20' . $oldAmount . '%20->%20<b>' . (int)$apartInfo['price']['amount'] . '</b>' : '<b>' . (int)$apartInfo['price']['amount'] . '%20('. (int)($apartInfo['price']['amount']/$apartInfo['area']['total']) .'$)</b>';
+    $amount = $update ? '<b>Up:</b>%20' . $oldAmount . '%20->%20<b>' . (int)$apartInfo['price']['amount'] . '%20('. (int)($apartInfo['price']['amount']/$apartInfo['area']['total']) .'$)</b>' : '<b>' . (int)$apartInfo['price']['amount'] . '%20('. (int)($apartInfo['price']['amount']/$apartInfo['area']['total']) .'$)</b>';
 
     $baseUrl = 'https://api.telegram.org/bot' . $tg . '/sendMessage?chat_id=@aveaparts&disable_web_page_preview=true&parse_mode=HTML&text='.'<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '</a>' .urlencode( "\n"  . $apartInfo['area']['total'] . ' (' . $apartInfo['area']['living'] . ') - '.$apartInfo['number_of_rooms'] . ' ком.'."\n". $apartInfo['floor'] . '/' . $apartInfo['number_of_floors'] ."\n". $apartInfo['location']['address']);
 //        '<a%20href="' . $apartInfo['url'] . '">' . $agency . $amount . '(' . $apartInfo['price']['currency'] . ')%20-%20' . $apartInfo['location']['address'] . '</a>';
@@ -51,7 +55,7 @@ function sendMessage($apartInfo, $tg, $update = false, $oldAmount = 0):bool
     curl_close($ch);
     print "\n\n";
     print $baseUrl;
-    sleep(3);
+    sleep(2);
     return true;
 }
 
@@ -142,7 +146,7 @@ function sellApartsFromOnliner($config, $token){
                     $res = pg_update($db, 'new_aparts', [
                         'id' => (int)$apartFromOnliner['id'],
                         'author_id' => (int)$apartFromOnliner['author_id'],
-                        'address' => $apartFromOnliner['location']['address'],
+                        'address' => !empty($apartFromOnliner['location']['address']) ? $apartFromOnliner['location']['address'] : $apartFromOnliner['location']['user_address'],
                         'created_at' => strtotime($apartFromOnliner['created_at']),
                         'last_time_up' => strtotime($apartFromOnliner['last_time_up']),
                         'price' => (int)$apartFromOnliner['price']['converted']['USD']['amount'],
@@ -160,7 +164,7 @@ function sellApartsFromOnliner($config, $token){
                     ], ['id' => $apartFromOnliner['id']]);
                     if ($res) {
                         print "sendMessage Update\n";
-                        sendMessage($apartFromOnliner, $token,true, $item['amount']);
+                        sendMessage($apartFromOnliner, $token,true, $item['price']);
                     } else {
                         print pg_last_error();
                         die('error update');
@@ -176,7 +180,7 @@ function sellApartsFromOnliner($config, $token){
                              [
                                  'id' => (int)$apartFromOnliner['id'],
                                  'author_id' => (int)$apartFromOnliner['author_id'],
-                                 'address' => $apartFromOnliner['location']['address'],
+                                 'address' => !empty($apartFromOnliner['location']['address']) ? $apartFromOnliner['location']['address'] : $apartFromOnliner['location']['user_address'],
                                  'created_at' => strtotime($apartFromOnliner['created_at']),
                                  'last_time_up' => strtotime($apartFromOnliner['last_time_up']),
                                  'price' => (int)$apartFromOnliner['price']['converted']['USD']['amount'],
